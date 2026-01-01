@@ -205,7 +205,7 @@ export function ExpenseForm({
                                     type="button"
                                     onClick={() => togglePaidFor(person.name)}
                                     className={cn(
-                                        'px-3 py-1.5 text-sm transition-colors border',
+                                        'px-3 py-1.5 text-sm transition-colors border cursor-pointer',
                                         paidFor.includes(person.name)
                                             ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 border-stone-900 dark:border-stone-100'
                                             : 'bg-transparent text-stone-700 dark:text-stone-300 border-stone-300 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800'
@@ -294,7 +294,7 @@ export function ExpenseForm({
                                                         toggleItemPaidFor(index, person.name)
                                                     }
                                                     className={cn(
-                                                        'px-2.5 py-1 text-xs transition-colors border',
+                                                        'px-2.5 py-1 text-xs transition-colors border cursor-pointer',
                                                         item.paidFor.includes(person.name)
                                                             ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 border-stone-900 dark:border-stone-100'
                                                             : 'bg-transparent text-stone-600 dark:text-stone-400 border-stone-300 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800'
