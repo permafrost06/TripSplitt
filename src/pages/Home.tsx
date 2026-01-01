@@ -168,7 +168,7 @@ export function Home() {
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={(e) => handleDeleteTrip(e, trip.id, trip.name)}
-                                        className="p-2 text-stone-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                                        className="p-2 text-stone-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
                                         title="Delete trip"
                                     >
                                         <Trash2 className="w-4 h-4" />

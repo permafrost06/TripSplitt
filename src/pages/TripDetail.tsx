@@ -181,7 +181,7 @@ export function TripDetail() {
                 <TabsList className="w-full grid grid-cols-3 border-b border-stone-200 dark:border-stone-800 rounded-none bg-transparent p-0 h-auto">
                     <TabsTrigger
                         value="expenses"
-                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-stone-900 dark:data-[state=active]:border-stone-100 data-[state=active]:bg-transparent px-0 py-3"
+                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-stone-900 dark:data-[state=active]:border-stone-100 data-[state=active]:bg-transparent px-0 py-3 cursor-pointer"
                     >
                         <Receipt className="w-4 h-4 mr-2" />
                         Expenses
@@ -191,7 +191,7 @@ export function TripDetail() {
                     </TabsTrigger>
                     <TabsTrigger
                         value="people"
-                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-stone-900 dark:data-[state=active]:border-stone-100 data-[state=active]:bg-transparent px-0 py-3"
+                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-stone-900 dark:data-[state=active]:border-stone-100 data-[state=active]:bg-transparent px-0 py-3 cursor-pointer"
                     >
                         <Users className="w-4 h-4 mr-2" />
                         People
@@ -201,7 +201,7 @@ export function TripDetail() {
                     </TabsTrigger>
                     <TabsTrigger
                         value="settlement"
-                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-stone-900 dark:data-[state=active]:border-stone-100 data-[state=active]:bg-transparent px-0 py-3"
+                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-stone-900 dark:data-[state=active]:border-stone-100 data-[state=active]:bg-transparent px-0 py-3 cursor-pointer"
                     >
                         <Calculator className="w-4 h-4 mr-2" />
                         Settlement
