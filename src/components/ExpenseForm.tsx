@@ -218,33 +218,31 @@ export function ExpenseForm({
                     </div>
 
                     <div className="border-t border-stone-200 dark:border-stone-800 pt-5">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-2">
-                                <Checkbox
-                                    id="itemize"
-                                    checked={showItems}
-                                    onCheckedChange={(checked) => setShowItems(checked === true)}
-                                />
-                                <Label htmlFor="itemize" className="cursor-pointer">
-                                    Itemize expense
-                                </Label>
-                            </div>
-                            {showItems && (
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={addItem}
-                                    className="gap-1"
-                                >
-                                    <Plus className="w-4 h-4" />
-                                    Add Item
-                                </Button>
-                            )}
+                        <div className="flex items-center gap-2 mb-4">
+                            <Checkbox
+                                id="itemize"
+                                checked={showItems}
+                                onCheckedChange={(checked) => setShowItems(checked === true)}
+                            />
+                            <Label htmlFor="itemize" className="cursor-pointer">
+                                Itemize expense
+                            </Label>
                         </div>
 
                         {showItems && (
                             <div className="space-y-3">
+                                <div className="sticky top-[72px] z-10 bg-white dark:bg-stone-950 pt-2 pb-2 -mx-4 px-4">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={addItem}
+                                        className="w-full h-9 gap-1"
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                        Add Item
+                                    </Button>
+                                </div>
+
                                 {items.map((item, index) => (
                                     <div
                                         key={index}
