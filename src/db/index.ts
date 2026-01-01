@@ -50,10 +50,11 @@ export async function deleteTrip(id: string): Promise<void> {
     await db.delete('trips', id);
 }
 
-export async function createTrip(name: string): Promise<Trip> {
+export async function createTrip(name: string, currency: 'USD' | 'BDT' = 'BDT'): Promise<Trip> {
     const trip: Trip = {
         id: crypto.randomUUID(),
         name,
+        currency,
         people: [],
         expenses: [],
         createdAt: Date.now(),

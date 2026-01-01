@@ -18,9 +18,12 @@ export interface Expense {
     items?: ExpenseItem[]; // Optional itemized breakdown
 }
 
+export type Currency = 'USD' | 'BDT';
+
 export interface Trip {
     id: string;
     name: string;
+    currency: Currency;
     people: Person[];
     expenses: Expense[];
     createdAt: number;

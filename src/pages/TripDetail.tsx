@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { formatCurrency } from '@/lib/utils';
 
 export function TripDetail() {
     const { id } = useParams<{ id: string }>();
@@ -130,43 +131,48 @@ export function TripDetail() {
                     <ArrowLeft className="w-5 h-5" />
                 </Button>
                 <div className="flex-1">
-                    {editingName ? (
-                        <div className="flex items-center gap-2">
-                            <Input
-                                type="text"
-                                value={newName}
-                                onChange={(e) => setNewName(e.target.value)}
-                                className="text-2xl font-serif bg-transparent border-b border-stone-300 dark:border-stone-700 focus:border-stone-900 dark:focus:border-stone-100"
-                                autoFocus
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') handleSaveName();
-                                    if (e.key === 'Escape') setEditingName(false);
-                                }}
-                            />
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={handleSaveName}
-                                className="text-emerald-600"
+                    <div className="flex items-center gap-3">
+                        {editingName ? (
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    type="text"
+                                    value={newName}
+                                    onChange={(e) => setNewName(e.target.value)}
+                                    className="text-2xl font-serif bg-transparent border-b border-stone-300 dark:border-stone-700 focus:border-stone-900 dark:focus:border-stone-100"
+                                    autoFocus
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') handleSaveName();
+                                        if (e.key === 'Escape') setEditingName(false);
+                                    }}
+                                />
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={handleSaveName}
+                                    className="text-emerald-600"
+                                >
+                                    <Check className="w-5 h-5" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => setEditingName(false)}
+                                >
+                                    <X className="w-5 h-5" />
+                                </Button>
+                            </div>
+                        ) : (
+                            <button
+                                onClick={startEditingName}
+                                className="text-2xl font-serif text-stone-900 dark:text-stone-100 hover:text-stone-700 dark:hover:text-stone-300 transition-colors text-left"
                             >
-                                <Check className="w-5 h-5" />
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => setEditingName(false)}
-                            >
-                                <X className="w-5 h-5" />
-                            </Button>
-                        </div>
-                    ) : (
-                        <button
-                            onClick={startEditingName}
-                            className="text-2xl font-serif text-stone-900 dark:text-stone-100 hover:text-stone-700 dark:hover:text-stone-300 transition-colors text-left"
-                        >
-                            {trip.name}
-                        </button>
-                    )}
+                                {trip.name}
+                            </button>
+                        )}
+                        <Badge variant="secondary" className="text-sm">
+                            {formatCurrency(0, trip.currency).replace('0.00', '').trim()}
+                        </Badge>
+                    </div>
                 </div>
             </div>
 
@@ -338,6 +344,7 @@ export function TripDetail() {
                                 setEditingExpense(null);
                             }}
                             initialExpense={editingExpense || undefined}
+                            currency={trip.currency}
                         />
                     ) : (
                         <>
@@ -390,7 +397,10 @@ export function TripDetail() {
                                                 </div>
                                                 <div className="flex items-center gap-4">
                                                     <span className="text-lg font-medium text-stone-900 dark:text-stone-100">
-                                                        ${expense.amount.toFixed(2)}
+                                                        {formatCurrency(
+                                                            expense.amount,
+                                                            trip.currency
+                                                        )}
                                                     </span>
                                                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <Button

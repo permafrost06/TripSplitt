@@ -25,8 +25,8 @@ export function useTrips() {
     }, [loadTrips]);
 
     const createTrip = useCallback(
-        async (name: string) => {
-            const trip = await db.createTrip(name);
+        async (name: string, currency: 'USD' | 'BDT' = 'BDT') => {
+            const trip = await db.createTrip(name, currency);
             await loadTrips();
             return trip;
         },

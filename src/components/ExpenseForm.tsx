@@ -13,16 +13,24 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
+import type { Currency } from '@/types';
 
 interface ExpenseFormProps {
     people: Person[];
     onAdd: (expense: Expense) => void;
     onCancel: () => void;
     initialExpense?: Expense;
+    currency?: Currency;
 }
 
-export function ExpenseForm({ people, onAdd, onCancel, initialExpense }: ExpenseFormProps) {
+export function ExpenseForm({
+    people,
+    onAdd,
+    onCancel,
+    initialExpense,
+    currency = 'USD',
+}: ExpenseFormProps) {
     const [description, setDescription] = useState(initialExpense?.description || '');
     const [amount, setAmount] = useState(initialExpense?.amount?.toString() || '');
     const [paidBy, setPaidBy] = useState(initialExpense?.paidBy || '');
@@ -145,18 +153,24 @@ export function ExpenseForm({ people, onAdd, onCancel, initialExpense }: Expense
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="expenseAmount">Amount</Label>
-                            <Input
-                                id="expenseAmount"
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                value={amount}
-                                onChange={(e) => {
-                                    setAmount(e.target.value);
-                                    setError('');
-                                }}
-                                placeholder="0.00"
-                            />
+                            <div className="relative">
+                                <Input
+                                    id="expenseAmount"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={amount}
+                                    onChange={(e) => {
+                                        setAmount(e.target.value);
+                                        setError('');
+                                    }}
+                                    placeholder="0.00"
+                                    className="pr-12"
+                                />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-stone-500">
+                                    {currency === 'BDT' ? '৳' : '$'}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
@@ -299,9 +313,10 @@ export function ExpenseForm({ people, onAdd, onCancel, initialExpense }: Expense
                                     <div className="text-sm text-right">
                                         <span className="text-stone-500">Items: </span>
                                         <span className="font-medium">
-                                            {items
-                                                .reduce((sum, item) => sum + item.amount, 0)
-                                                .toFixed(2)}
+                                            {formatCurrency(
+                                                items.reduce((sum, item) => sum + item.amount, 0),
+                                                currency
+                                            )}
                                         </span>
                                         {amount && (
                                             <span
@@ -317,7 +332,7 @@ export function ExpenseForm({ people, onAdd, onCancel, initialExpense }: Expense
                                                         : 'text-emerald-600'
                                                 )}
                                             >
-                                                / {parseFloat(amount).toFixed(2)}
+                                                / {formatCurrency(parseFloat(amount), currency)}
                                             </span>
                                         )}
                                     </div>

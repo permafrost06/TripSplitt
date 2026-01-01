@@ -6,19 +6,37 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import type { Currency } from '@/types';
+import { formatCurrency } from '@/lib/utils';
 
 export function Home() {
     const { trips, loading, createTrip } = useTrips();
     const [newTripName, setNewTripName] = useState('');
+    const [newTripCurrency, setNewTripCurrency] = useState<Currency>('BDT');
     const [showForm, setShowForm] = useState(false);
 
     const handleCreateTrip = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newTripName.trim()) return;
 
-        await createTrip(newTripName.trim());
+        await createTrip(newTripName.trim(), newTripCurrency);
         setNewTripName('');
+        setNewTripCurrency('BDT');
         setShowForm(false);
+    };
+
+    const handleCancel = () => {
+        setShowForm(false);
+        setNewTripName('');
+        setNewTripCurrency('BDT');
     };
 
     if (loading) {
@@ -54,6 +72,7 @@ export function Home() {
                     <CardContent>
                         <form onSubmit={handleCreateTrip} className="space-y-4">
                             <div className="space-y-2">
+                                <Label htmlFor="tripName">Trip Name</Label>
                                 <Input
                                     id="tripName"
                                     type="text"
@@ -63,6 +82,21 @@ export function Home() {
                                     autoFocus
                                 />
                             </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="currency">Currency</Label>
+                                <Select
+                                    value={newTripCurrency}
+                                    onValueChange={(value: Currency) => setNewTripCurrency(value)}
+                                >
+                                    <SelectTrigger id="currency">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="USD">USD ($)</SelectItem>
+                                        <SelectItem value="BDT">BDT (৳)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                             <div className="flex gap-3">
                                 <Button
                                     type="submit"
@@ -71,14 +105,7 @@ export function Home() {
                                 >
                                     Create
                                 </Button>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => {
-                                        setShowForm(false);
-                                        setNewTripName('');
-                                    }}
-                                >
+                                <Button type="button" variant="outline" onClick={handleCancel}>
                                     Cancel
                                 </Button>
                             </div>
@@ -118,6 +145,11 @@ export function Home() {
                                                 <Receipt className="w-4 h-4" />
                                                 {trip.expenses.length}
                                             </span>
+                                            <Badge variant="secondary" className="text-xs">
+                                                {formatCurrency(0, trip.currency)
+                                                    .replace('0.00', '')
+                                                    .trim()}
+                                            </Badge>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-4">

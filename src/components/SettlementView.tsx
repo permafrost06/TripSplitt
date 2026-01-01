@@ -6,6 +6,7 @@ import { shareTrip } from '../api/share';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { formatCurrency } from '@/lib/utils';
 
 interface SettlementViewProps {
     trip: Trip;
@@ -122,7 +123,7 @@ export function SettlementView({ trip }: SettlementViewProps) {
                 <div>
                     <p className="text-sm text-stone-500 dark:text-stone-400">Total Cost</p>
                     <p className="text-3xl font-serif text-stone-900 dark:text-stone-100 mt-1">
-                        ${settlement.totalCost.toFixed(2)}
+                        {formatCurrency(settlement.totalCost, trip.currency)}
                     </p>
                 </div>
                 <div>
@@ -146,7 +147,7 @@ export function SettlementView({ trip }: SettlementViewProps) {
                             <div key={person} className="flex items-center justify-between py-3">
                                 <span className="text-stone-900 dark:text-stone-100">{person}</span>
                                 <span className="font-medium text-stone-900 dark:text-stone-100">
-                                    ${cost.toFixed(2)}
+                                    {formatCurrency(cost, trip.currency)}
                                 </span>
                             </div>
                         ))}
@@ -174,7 +175,7 @@ export function SettlementView({ trip }: SettlementViewProps) {
                                         </span>
                                     </div>
                                     <span className="font-medium text-stone-900 dark:text-stone-100">
-                                        ${transaction.amount.toFixed(2)}
+                                        {formatCurrency(transaction.amount, trip.currency)}
                                     </span>
                                 </div>
                             ))}
