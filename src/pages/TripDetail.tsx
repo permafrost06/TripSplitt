@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
     ArrowLeft,
@@ -10,6 +10,7 @@ import {
     Check,
     Calculator,
     Plus,
+    ChevronDown,
 } from 'lucide-react';
 import { useTrip } from '../hooks/useTrips';
 import { PersonForm } from '../components/PersonForm';
@@ -44,6 +45,16 @@ export function TripDetail() {
     const [editingPersonData, setEditingPersonData] = useState<Person | null>(null);
     const [editingName, setEditingName] = useState(false);
     const [newName, setNewName] = useState('');
+    const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+
+    useEffect(() => {
+        if (trip) {
+            const itemizedExpenseIds = trip.expenses
+                .filter((e) => e.items && e.items.length > 0)
+                .map((e) => e.id);
+            setExpandedItems(new Set(itemizedExpenseIds));
+        }
+    }, [trip]);
 
     if (loading) {
         return (
@@ -69,6 +80,20 @@ export function TripDetail() {
             </Card>
         );
     }
+
+    const toggleExpandedItems = (expenseId: string) => {
+        setExpandedItems((prev) => {
+            const next = new Set(prev);
+            if (next.has(expenseId)) {
+                next.delete(expenseId);
+            } else {
+                next.add(expenseId);
+            }
+            return next;
+        });
+    };
+
+    const isItemizedExpanded = (expenseId: string) => expandedItems.has(expenseId);
 
     const handleAddExpense = async (expense: Expense) => {
         if (editingExpense) {
@@ -375,7 +400,14 @@ export function TripDetail() {
                                     {trip.expenses.map((expense) => (
                                         <article
                                             key={expense.id}
-                                            className="group border-b border-stone-200 dark:border-stone-800 py-4 hover:bg-stone-50 dark:hover:bg-stone-900/50 transition-colors -mx-6 px-6"
+                                            onClick={() =>
+                                                expense.items && toggleExpandedItems(expense.id)
+                                            }
+                                            className={`group border-b border-stone-200 dark:border-stone-800 py-4 -mx-6 px-6 cursor-pointer ${
+                                                expense.items
+                                                    ? 'hover:bg-stone-100 dark:hover:bg-stone-800/50'
+                                                    : 'hover:bg-stone-50 dark:hover:bg-stone-900/50'
+                                            } ${expense.items ? 'bg-stone-50/50 dark:bg-stone-900/30' : ''}`}
                                         >
                                             <div className="flex items-start justify-between gap-4">
                                                 <div className="flex-1 min-w-0">
@@ -415,27 +447,91 @@ export function TripDetail() {
                                                         )}
                                                     </span>
                                                     <div className="flex items-center gap-1">
+                                                        {expense.items && (
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    toggleExpandedItems(expense.id);
+                                                                }}
+                                                                className="cursor-pointer"
+                                                            >
+                                                                <ChevronDown
+                                                                    className={`w-4 h-4 transition-transform ${
+                                                                        isItemizedExpanded(
+                                                                            expense.id
+                                                                        )
+                                                                            ? 'rotate-180'
+                                                                            : ''
+                                                                    }`}
+                                                                />
+                                                            </Button>
+                                                        )}
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            onClick={() =>
-                                                                handleEditExpense(expense)
-                                                            }
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleEditExpense(expense);
+                                                            }}
+                                                            className="cursor-pointer"
                                                         >
                                                             <Pencil className="w-4 h-4" />
                                                         </Button>
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            onClick={() =>
-                                                                handleDeleteExpense(expense)
-                                                            }
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDeleteExpense(expense);
+                                                            }}
+                                                            className="cursor-pointer"
                                                         >
                                                             <Trash2 className="w-4 h-4" />
                                                         </Button>
                                                     </div>
                                                 </div>
                                             </div>
+                                            {expense.items && isItemizedExpanded(expense.id) && (
+                                                <div className="mt-4 pt-4 border-t border-stone-200 dark:border-stone-700">
+                                                    <div className="space-y-2">
+                                                        {expense.items.map((item, index) => (
+                                                            <div
+                                                                key={index}
+                                                                className="flex items-center justify-between text-sm"
+                                                            >
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-stone-600 dark:text-stone-400">
+                                                                        {item.description}
+                                                                    </span>
+                                                                    <div className="flex gap-1">
+                                                                        {item.paidFor.map(
+                                                                            (person) => (
+                                                                                <Badge
+                                                                                    key={person}
+                                                                                    variant="secondary"
+                                                                                    className="text-[10px] px-1.5 py-0"
+                                                                                >
+                                                                                    {person.charAt(
+                                                                                        0
+                                                                                    )}
+                                                                                </Badge>
+                                                                            )
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                                <span className="font-medium text-stone-900 dark:text-stone-100">
+                                                                    {formatCurrency(
+                                                                        item.amount,
+                                                                        trip.currency
+                                                                    )}
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </article>
                                     ))}
                                 </div>
