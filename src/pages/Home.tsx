@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, MapPin, Users, Receipt, ArrowRight } from 'lucide-react';
+import { Plus, MapPin, Users, Receipt, ArrowRight, Trash2 } from 'lucide-react';
 import { useTrips } from '../hooks/useTrips';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +18,7 @@ import type { Currency } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 
 export function Home() {
-    const { trips, loading, createTrip } = useTrips();
+    const { trips, loading, createTrip, deleteTrip } = useTrips();
     const [newTripName, setNewTripName] = useState('');
     const [newTripCurrency, setNewTripCurrency] = useState<Currency>('BDT');
     const [showForm, setShowForm] = useState(false);
@@ -37,6 +37,14 @@ export function Home() {
         setShowForm(false);
         setNewTripName('');
         setNewTripCurrency('BDT');
+    };
+
+    const handleDeleteTrip = async (e: React.MouseEvent, tripId: string, tripName: string) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (confirm(`Delete "${tripName}"? This cannot be undone.`)) {
+            await deleteTrip(tripId);
+        }
     };
 
     if (loading) {
@@ -129,38 +137,46 @@ export function Home() {
             ) : (
                 <div className="space-y-0">
                     {trips.map((trip) => (
-                        <Link key={trip.id} to={`/trip/${trip.id}`}>
-                            <article className="group border-b border-stone-200 dark:border-stone-800 py-6 hover:bg-stone-50 dark:hover:bg-stone-900/50 transition-colors -mx-6 px-6">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex-1 min-w-0">
-                                        <h2 className="text-lg font-medium text-stone-900 dark:text-stone-100 truncate group-hover:text-stone-700 dark:group-hover:text-stone-300 transition-colors">
-                                            {trip.name}
-                                        </h2>
-                                        <div className="flex items-center gap-4 mt-2 text-sm text-stone-500 dark:text-stone-400">
-                                            <span className="flex items-center gap-1.5">
-                                                <Users className="w-4 h-4" />
-                                                {trip.people.length}
-                                            </span>
-                                            <span className="flex items-center gap-1.5">
-                                                <Receipt className="w-4 h-4" />
-                                                {trip.expenses.length}
-                                            </span>
-                                            <Badge variant="secondary" className="text-xs">
-                                                {formatCurrency(0, trip.currency)
-                                                    .replace('0.00', '')
-                                                    .trim()}
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-4">
-                                        <Badge variant="secondary">
-                                            {trip.expenses.length} expenses
+                        <div
+                            key={trip.id}
+                            className="group border-b border-stone-200 dark:border-stone-800"
+                        >
+                            <Link
+                                to={`/trip/${trip.id}`}
+                                className="flex items-center justify-between py-6 -mx-6 px-6 hover:bg-stone-50 dark:hover:bg-stone-900/50 transition-colors"
+                            >
+                                <div className="flex-1 min-w-0">
+                                    <h2 className="text-lg font-medium text-stone-900 dark:text-stone-100 truncate group-hover:text-stone-700 dark:group-hover:text-stone-300 transition-colors">
+                                        {trip.name}
+                                    </h2>
+                                    <div className="flex items-center gap-4 mt-2 text-sm text-stone-500 dark:text-stone-400">
+                                        <span className="flex items-center gap-1.5">
+                                            <Users className="w-4 h-4" />
+                                            {trip.people.length}
+                                        </span>
+                                        <span className="flex items-center gap-1.5">
+                                            <Receipt className="w-4 h-4" />
+                                            {trip.expenses.length}
+                                        </span>
+                                        <Badge variant="secondary" className="text-xs">
+                                            {formatCurrency(0, trip.currency)
+                                                .replace('0.00', '')
+                                                .trim()}
                                         </Badge>
-                                        <ArrowRight className="w-5 h-5 text-stone-300 group-hover:text-stone-500 transition-colors" />
                                     </div>
                                 </div>
-                            </article>
-                        </Link>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={(e) => handleDeleteTrip(e, trip.id, trip.name)}
+                                        className="p-2 text-stone-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                                        title="Delete trip"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                    <ArrowRight className="w-5 h-5 text-stone-300 group-hover:text-stone-500 transition-colors" />
+                                </div>
+                            </Link>
+                        </div>
                     ))}
                 </div>
             )}
