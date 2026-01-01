@@ -375,7 +375,7 @@ export function TripDetail() {
                                     {trip.expenses.map((expense) => (
                                         <article
                                             key={expense.id}
-                                            className="border-b border-stone-200 dark:border-stone-800 py-4 hover:bg-stone-50 dark:hover:bg-stone-900/50 transition-colors -mx-6 px-6"
+                                            className="group border-b border-stone-200 dark:border-stone-800 py-4 hover:bg-stone-50 dark:hover:bg-stone-900/50 transition-colors -mx-6 px-6"
                                         >
                                             <div className="flex items-start justify-between gap-4">
                                                 <div className="flex-1 min-w-0">
@@ -397,14 +397,14 @@ export function TripDetail() {
                                                         ))}
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-4">
+                                                <div className="flex flex-col items-end gap-2">
                                                     <span className="text-lg font-medium text-stone-900 dark:text-stone-100">
                                                         {formatCurrency(
                                                             expense.amount,
                                                             trip.currency
                                                         )}
                                                     </span>
-                                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <div className="flex items-center gap-1">
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
