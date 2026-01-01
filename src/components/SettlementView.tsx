@@ -1,8 +1,11 @@
 import { useMemo, useState } from 'react';
-import { ArrowRight, Share2, Check, Copy } from 'lucide-react';
+import { ArrowRight, Check, Copy, Receipt } from 'lucide-react';
 import type { Trip } from '../types';
 import { calculateSettlement } from '../lib/settlement';
 import { shareTrip } from '../api/share';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 
 interface SettlementViewProps {
     trip: Trip;
@@ -41,7 +44,6 @@ export function SettlementView({ trip }: SettlementViewProps) {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         } catch {
-            // Fallback for older browsers
             const textArea = document.createElement('textarea');
             textArea.value = shareUrl;
             document.body.appendChild(textArea);
@@ -55,110 +57,143 @@ export function SettlementView({ trip }: SettlementViewProps) {
 
     if (trip.expenses.length === 0) {
         return (
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 text-center">
-                <p className="text-gray-500">Add some expenses to see the settlement</p>
-            </div>
+            <Card className="py-12">
+                <CardContent>
+                    <div className="text-center">
+                        <Receipt className="w-8 h-8 mx-auto text-stone-300 dark:text-stone-700 mb-4" />
+                        <p className="text-stone-500 dark:text-stone-400">
+                            Add expenses to see settlement
+                        </p>
+                    </div>
+                </CardContent>
+            </Card>
         );
     }
 
     return (
-        <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 space-y-6">
-            <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">Settlement</h3>
-                <button
-                    onClick={handleShare}
-                    disabled={sharing}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
-                >
-                    <Share2 className="w-4 h-4" />
-                    {sharing ? 'Sharing...' : 'Share Trip'}
-                </button>
-            </div>
-
-            {shareUrl && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <p className="text-sm font-medium text-green-800 mb-2">Share this link:</p>
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="text"
-                            value={shareUrl}
-                            readOnly
-                            className="flex-1 px-3 py-2 text-sm bg-white border border-green-300 rounded-lg"
-                        />
-                        <button
-                            onClick={handleCopy}
-                            className="flex items-center gap-1 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+        <div className="space-y-8">
+            {/* Share */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                        <span>Share Trip</span>
+                        <Button
+                            onClick={handleShare}
+                            disabled={sharing}
+                            size="sm"
+                            variant="outline"
                         >
-                            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                            {copied ? 'Copied!' : 'Copy'}
-                        </button>
-                    </div>
-                </div>
-            )}
+                            {sharing ? 'Sharing...' : 'Generate Link'}
+                        </Button>
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {shareUrl && (
+                        <div className="flex items-center gap-2">
+                            <Input
+                                type="text"
+                                value={shareUrl}
+                                readOnly
+                                className="flex-1 text-sm"
+                            />
+                            <Button
+                                onClick={handleCopy}
+                                size="sm"
+                                variant="default"
+                                className="gap-1.5"
+                            >
+                                {copied ? (
+                                    <Check className="w-4 h-4" />
+                                ) : (
+                                    <Copy className="w-4 h-4" />
+                                )}
+                                {copied ? 'Copied' : 'Copy'}
+                            </Button>
+                        </div>
+                    )}
+                    {shareError && (
+                        <p className="text-sm text-red-600 dark:text-red-400">{shareError}</p>
+                    )}
+                </CardContent>
+            </Card>
 
-            {shareError && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <p className="text-sm text-red-800">{shareError}</p>
-                </div>
-            )}
-
-            <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-sm text-gray-500">Total Cost</p>
-                    <p className="text-2xl font-bold text-gray-900">
+            {/* Summary */}
+            <div className="grid grid-cols-2 gap-6">
+                <div>
+                    <p className="text-sm text-stone-500 dark:text-stone-400">Total Cost</p>
+                    <p className="text-3xl font-serif text-stone-900 dark:text-stone-100 mt-1">
                         ${settlement.totalCost.toFixed(2)}
                     </p>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-sm text-gray-500">Expenses</p>
-                    <p className="text-2xl font-bold text-gray-900">{trip.expenses.length}</p>
-                </div>
-            </div>
-
-            <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-3">Individual Costs</h4>
-                <div className="space-y-2">
-                    {settlement.individualCosts.map(({ person, cost }) => (
-                        <div
-                            key={person}
-                            className="flex items-center justify-between py-2 border-b border-gray-100"
-                        >
-                            <span className="font-medium text-gray-900">{person}</span>
-                            <span className="text-gray-600">${cost.toFixed(2)}</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {settlement.transactions.length > 0 ? (
                 <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-3">Payments to Settle</h4>
-                    <div className="space-y-3">
-                        {settlement.transactions.map((transaction, index) => (
-                            <div
-                                key={index}
-                                className="flex items-center justify-between bg-blue-50 rounded-lg p-4"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <span className="font-medium text-gray-900">
-                                        {transaction.from}
-                                    </span>
-                                    <ArrowRight className="w-4 h-4 text-gray-400" />
-                                    <span className="font-medium text-gray-900">
-                                        {transaction.to}
-                                    </span>
-                                </div>
-                                <span className="text-lg font-bold text-blue-600">
-                                    ${transaction.amount.toFixed(2)}
+                    <p className="text-sm text-stone-500 dark:text-stone-400">Expenses</p>
+                    <p className="text-3xl font-serif text-stone-900 dark:text-stone-100 mt-1">
+                        {trip.expenses.length}
+                    </p>
+                </div>
+            </div>
+
+            {/* Individual Costs */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-sm uppercase tracking-wide">
+                        Individual Costs
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                    <div className="divide-y divide-stone-100 dark:divide-stone-800">
+                        {settlement.individualCosts.map(({ person, cost }) => (
+                            <div key={person} className="flex items-center justify-between py-3">
+                                <span className="text-stone-900 dark:text-stone-100">{person}</span>
+                                <span className="font-medium text-stone-900 dark:text-stone-100">
+                                    ${cost.toFixed(2)}
                                 </span>
                             </div>
                         ))}
                     </div>
-                </div>
+                </CardContent>
+            </Card>
+
+            {/* Transactions */}
+            {settlement.transactions.length > 0 ? (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-sm uppercase tracking-wide">Payments</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                        <div className="divide-y divide-stone-100 dark:divide-stone-800">
+                            {settlement.transactions.map((transaction, index) => (
+                                <div key={index} className="flex items-center justify-between py-3">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-stone-900 dark:text-stone-100">
+                                            {transaction.from}
+                                        </span>
+                                        <ArrowRight className="w-4 h-4 text-stone-400" />
+                                        <span className="text-stone-900 dark:text-stone-100">
+                                            {transaction.to}
+                                        </span>
+                                    </div>
+                                    <span className="font-medium text-stone-900 dark:text-stone-100">
+                                        ${transaction.amount.toFixed(2)}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
             ) : (
-                <div className="bg-green-50 rounded-lg p-4 text-center">
-                    <p className="text-green-700 font-medium">All settled! No payments needed.</p>
-                </div>
+                <Card>
+                    <CardContent className="py-8">
+                        <div className="text-center">
+                            <p className="text-lg font-serif text-stone-900 dark:text-stone-100">
+                                All settled
+                            </p>
+                            <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
+                                No payments needed
+                            </p>
+                        </div>
+                    </CardContent>
+                </Card>
             )}
         </div>
     );

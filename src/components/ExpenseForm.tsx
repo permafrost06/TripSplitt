@@ -1,6 +1,19 @@
 import { useState } from 'react';
 import { Plus, X, Trash2 } from 'lucide-react';
 import type { Person, Expense, ExpenseItem } from '../types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 interface ExpenseFormProps {
     people: Person[];
@@ -32,17 +45,17 @@ export function ExpenseForm({ people, onAdd, onCancel, initialExpense }: Expense
 
         const parsedAmount = parseFloat(amount);
         if (isNaN(parsedAmount) || parsedAmount <= 0) {
-            setError('Amount must be a positive number');
+            setError('Amount must be positive');
             return;
         }
 
         if (!paidBy) {
-            setError('Please select who paid');
+            setError('Select who paid');
             return;
         }
 
         if (paidFor.length === 0) {
-            setError('Please select at least one person');
+            setError('Select at least one person');
             return;
         }
 
@@ -50,14 +63,14 @@ export function ExpenseForm({ people, onAdd, onCancel, initialExpense }: Expense
             const itemsTotal = items.reduce((sum, item) => sum + item.amount, 0);
             if (Math.abs(itemsTotal - parsedAmount) > 0.01) {
                 setError(
-                    `Items total ($${itemsTotal.toFixed(2)}) doesn't match expense amount ($${parsedAmount.toFixed(2)})`
+                    `Items total (${itemsTotal.toFixed(2)}) doesn't match (${parsedAmount.toFixed(2)})`
                 );
                 return;
             }
 
             for (const item of items) {
                 if (!item.description.trim() || item.amount <= 0 || item.paidFor.length === 0) {
-                    setError('All items must have description, amount, and at least one person');
+                    setError('All items need description, amount, and person');
                     return;
                 }
             }
@@ -104,230 +117,227 @@ export function ExpenseForm({ people, onAdd, onCancel, initialExpense }: Expense
     };
 
     return (
-        <form
-            onSubmit={handleSubmit}
-            className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 space-y-4"
-        >
-            <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">
-                    {initialExpense ? 'Edit Expense' : 'Add Expense'}
-                </h3>
-                <button
-                    type="button"
-                    onClick={onCancel}
-                    className="text-gray-400 hover:text-gray-600"
-                >
-                    <X className="w-5 h-5" />
-                </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label
-                        htmlFor="expenseDescription"
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                        Description
-                    </label>
-                    <input
-                        id="expenseDescription"
-                        type="text"
-                        value={description}
-                        onChange={(e) => {
-                            setDescription(e.target.value);
-                            setError('');
-                        }}
-                        placeholder="e.g., Dinner, Hotel, Taxi"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        autoFocus
-                    />
+        <Card>
+            <CardHeader>
+                <div className="flex items-center justify-between">
+                    <CardTitle>{initialExpense ? 'Edit Expense' : 'Add Expense'}</CardTitle>
+                    <Button variant="ghost" size="icon" onClick={onCancel}>
+                        <X className="w-5 h-5" />
+                    </Button>
                 </div>
-                <div>
-                    <label
-                        htmlFor="expenseAmount"
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                        Amount
-                    </label>
-                    <input
-                        id="expenseAmount"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={amount}
-                        onChange={(e) => {
-                            setAmount(e.target.value);
-                            setError('');
-                        }}
-                        placeholder="0.00"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                </div>
-            </div>
+            </CardHeader>
+            <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="expenseDescription">Description</Label>
+                            <Input
+                                id="expenseDescription"
+                                type="text"
+                                value={description}
+                                onChange={(e) => {
+                                    setDescription(e.target.value);
+                                    setError('');
+                                }}
+                                placeholder="Expense description"
+                                autoFocus
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="expenseAmount">Amount</Label>
+                            <Input
+                                id="expenseAmount"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={amount}
+                                onChange={(e) => {
+                                    setAmount(e.target.value);
+                                    setError('');
+                                }}
+                                placeholder="0.00"
+                            />
+                        </div>
+                    </div>
 
-            <div>
-                <label htmlFor="paidBy" className="block text-sm font-medium text-gray-700 mb-1">
-                    Paid By
-                </label>
-                <select
-                    id="paidBy"
-                    value={paidBy}
-                    onChange={(e) => {
-                        setPaidBy(e.target.value);
-                        setError('');
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                    <option value="">Select person</option>
-                    {people.map((person) => (
-                        <option key={person.name} value={person.name}>
-                            {person.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Paid For</label>
-                <div className="flex flex-wrap gap-2">
-                    {people.map((person) => (
-                        <button
-                            key={person.name}
-                            type="button"
-                            onClick={() => togglePaidFor(person.name)}
-                            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                                paidFor.includes(person.name)
-                                    ? 'bg-blue-500 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
+                    <div className="space-y-2">
+                        <Label>Paid By</Label>
+                        <Select
+                            value={paidBy}
+                            onValueChange={(value) => {
+                                setPaidBy(value);
+                                setError('');
+                            }}
                         >
-                            {person.name}
-                        </button>
-                    ))}
-                </div>
-            </div>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select person" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {people.map((person) => (
+                                    <SelectItem key={person.name} value={person.name}>
+                                        {person.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
 
-            <div className="border-t pt-4">
-                <div className="flex items-center justify-between mb-4">
-                    <label className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            checked={showItems}
-                            onChange={(e) => setShowItems(e.target.checked)}
-                            className="w-4 h-4 text-blue-500 rounded"
-                        />
-                        <span className="text-sm font-medium text-gray-700">Itemize expense</span>
-                    </label>
-                    {showItems && (
-                        <button
-                            type="button"
-                            onClick={addItem}
-                            className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
-                        >
-                            <Plus className="w-4 h-4" />
-                            Add Item
-                        </button>
-                    )}
-                </div>
+                    <div className="space-y-2">
+                        <Label>Paid For</Label>
+                        <div className="flex flex-wrap gap-2">
+                            {people.map((person) => (
+                                <button
+                                    key={person.name}
+                                    type="button"
+                                    onClick={() => togglePaidFor(person.name)}
+                                    className={cn(
+                                        'px-3 py-1.5 text-sm transition-colors border',
+                                        paidFor.includes(person.name)
+                                            ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 border-stone-900 dark:border-stone-100'
+                                            : 'bg-transparent text-stone-700 dark:text-stone-300 border-stone-300 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800'
+                                    )}
+                                >
+                                    {person.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
 
-                {showItems && (
-                    <div className="space-y-4">
-                        {items.map((item, index) => (
-                            <div key={index} className="bg-gray-50 rounded-lg p-3 space-y-3">
-                                <div className="flex items-start gap-2">
-                                    <div className="flex-1 grid grid-cols-2 gap-2">
-                                        <input
-                                            type="text"
-                                            value={item.description}
-                                            onChange={(e) =>
-                                                updateItem(index, { description: e.target.value })
-                                            }
-                                            placeholder="Item description"
-                                            className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        />
-                                        <input
-                                            type="number"
-                                            step="0.01"
-                                            min="0"
-                                            value={item.amount || ''}
-                                            onChange={(e) =>
-                                                updateItem(index, {
-                                                    amount: parseFloat(e.target.value) || 0,
-                                                })
-                                            }
-                                            placeholder="0.00"
-                                            className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        />
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeItem(index)}
-                                        className="p-1 text-gray-400 hover:text-red-500"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-                                </div>
-                                <div className="flex flex-wrap gap-1">
-                                    {people.map((person) => (
-                                        <button
-                                            key={person.name}
-                                            type="button"
-                                            onClick={() => toggleItemPaidFor(index, person.name)}
-                                            className={`px-2 py-0.5 rounded-full text-xs font-medium transition-colors ${
-                                                item.paidFor.includes(person.name)
-                                                    ? 'bg-blue-500 text-white'
-                                                    : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                                            }`}
-                                        >
-                                            {person.name}
-                                        </button>
-                                    ))}
-                                </div>
+                    <div className="border-t border-stone-200 dark:border-stone-800 pt-5">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <Checkbox
+                                    id="itemize"
+                                    checked={showItems}
+                                    onCheckedChange={(checked) => setShowItems(checked === true)}
+                                />
+                                <Label htmlFor="itemize" className="cursor-pointer">
+                                    Itemize expense
+                                </Label>
                             </div>
-                        ))}
+                            {showItems && (
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={addItem}
+                                    className="gap-1"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    Add Item
+                                </Button>
+                            )}
+                        </div>
 
-                        {items.length > 0 && (
-                            <div className="text-sm text-gray-500 text-right">
-                                Items total: $
-                                {items.reduce((sum, item) => sum + item.amount, 0).toFixed(2)}
-                                {amount && (
-                                    <span
-                                        className={
-                                            Math.abs(
-                                                items.reduce((sum, item) => sum + item.amount, 0) -
-                                                    parseFloat(amount)
-                                            ) > 0.01
-                                                ? ' text-red-500'
-                                                : ' text-green-500'
-                                        }
+                        {showItems && (
+                            <div className="space-y-3">
+                                {items.map((item, index) => (
+                                    <div
+                                        key={index}
+                                        className="p-4 border border-stone-200 dark:border-stone-800 space-y-3"
                                     >
-                                        {' '}
-                                        / ${parseFloat(amount).toFixed(2)}
-                                    </span>
+                                        <div className="flex items-start gap-2">
+                                            <div className="flex-1 grid grid-cols-2 gap-2">
+                                                <Input
+                                                    type="text"
+                                                    value={item.description}
+                                                    onChange={(e) =>
+                                                        updateItem(index, {
+                                                            description: e.target.value,
+                                                        })
+                                                    }
+                                                    placeholder="Item description"
+                                                    className="h-9 text-sm"
+                                                />
+                                                <Input
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    value={item.amount || ''}
+                                                    onChange={(e) =>
+                                                        updateItem(index, {
+                                                            amount: parseFloat(e.target.value) || 0,
+                                                        })
+                                                    }
+                                                    placeholder="0.00"
+                                                    className="h-9 text-sm"
+                                                />
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => removeItem(index)}
+                                                className="h-9 w-9"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {people.map((person) => (
+                                                <button
+                                                    key={person.name}
+                                                    type="button"
+                                                    onClick={() =>
+                                                        toggleItemPaidFor(index, person.name)
+                                                    }
+                                                    className={cn(
+                                                        'px-2.5 py-1 text-xs transition-colors border',
+                                                        item.paidFor.includes(person.name)
+                                                            ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 border-stone-900 dark:border-stone-100'
+                                                            : 'bg-transparent text-stone-600 dark:text-stone-400 border-stone-300 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800'
+                                                    )}
+                                                >
+                                                    {person.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {items.length > 0 && (
+                                    <div className="text-sm text-right">
+                                        <span className="text-stone-500">Items: </span>
+                                        <span className="font-medium">
+                                            {items
+                                                .reduce((sum, item) => sum + item.amount, 0)
+                                                .toFixed(2)}
+                                        </span>
+                                        {amount && (
+                                            <span
+                                                className={cn(
+                                                    'ml-2',
+                                                    Math.abs(
+                                                        items.reduce(
+                                                            (sum, item) => sum + item.amount,
+                                                            0
+                                                        ) - parseFloat(amount)
+                                                    ) > 0.01
+                                                        ? 'text-red-600'
+                                                        : 'text-emerald-600'
+                                                )}
+                                            >
+                                                / {parseFloat(amount).toFixed(2)}
+                                            </span>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         )}
                     </div>
-                )}
-            </div>
 
-            {error && <p className="text-sm text-red-600">{error}</p>}
+                    {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
-            <div className="flex gap-2">
-                <button
-                    type="submit"
-                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                >
-                    {initialExpense ? 'Save Changes' : 'Add Expense'}
-                </button>
-                <button
-                    type="button"
-                    onClick={onCancel}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
-                >
-                    Cancel
-                </button>
-            </div>
-        </form>
+                    <div className="flex gap-3">
+                        <Button type="submit" className="flex-1">
+                            {initialExpense ? 'Save Changes' : 'Add Expense'}
+                        </Button>
+                        <Button type="button" variant="outline" onClick={onCancel}>
+                            Cancel
+                        </Button>
+                    </div>
+                </form>
+            </CardContent>
+        </Card>
     );
 }

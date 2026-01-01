@@ -1,13 +1,26 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Users, Receipt, Pencil, Trash2, X, Check } from 'lucide-react';
+import {
+    ArrowLeft,
+    Users,
+    Receipt,
+    Pencil,
+    Trash2,
+    X,
+    Check,
+    Calculator,
+    Plus,
+} from 'lucide-react';
 import { useTrip } from '../hooks/useTrips';
 import { PersonForm } from '../components/PersonForm';
 import { ExpenseForm } from '../components/ExpenseForm';
 import { SettlementView } from '../components/SettlementView';
 import type { Expense, Person } from '../types';
-
-type Tab = 'expenses' | 'people' | 'settlement';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 export function TripDetail() {
     const { id } = useParams<{ id: string }>();
@@ -24,7 +37,6 @@ export function TripDetail() {
         updateTrip,
     } = useTrip(id);
 
-    const [activeTab, setActiveTab] = useState<Tab>('expenses');
     const [showExpenseForm, setShowExpenseForm] = useState(false);
     const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
     const [editingPersonIndex, setEditingPersonIndex] = useState<number | null>(null);
@@ -34,20 +46,26 @@ export function TripDetail() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+            <div className="flex items-center justify-center py-20">
+                <div className="w-5 h-5 border border-stone-300 dark:border-stone-700 border-t-stone-900 dark:border-t-stone-100 animate-spin" />
             </div>
         );
     }
 
     if (!trip) {
         return (
-            <div className="text-center py-12">
-                <h2 className="text-lg font-medium text-gray-900 mb-2">Trip not found</h2>
-                <Link to="/" className="text-blue-600 hover:underline">
-                    Go back home
-                </Link>
-            </div>
+            <Card className="py-12">
+                <CardContent>
+                    <div className="text-center">
+                        <h2 className="text-lg font-medium text-stone-900 dark:text-stone-100 mb-2">
+                            Trip not found
+                        </h2>
+                        <Link to="/" className="text-stone-600 hover:underline dark:text-stone-400">
+                            Go back home
+                        </Link>
+                    </div>
+                </CardContent>
+            </Card>
         );
     }
 
@@ -104,52 +122,47 @@ export function TripDetail() {
         setEditingName(true);
     };
 
-    const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
-        { key: 'expenses', label: 'Expenses', icon: <Receipt className="w-4 h-4" /> },
-        { key: 'people', label: 'People', icon: <Users className="w-4 h-4" /> },
-        { key: 'settlement', label: 'Settlement', icon: <Receipt className="w-4 h-4" /> },
-    ];
-
     return (
-        <div className="space-y-6">
+        <div className="space-y-12">
+            {/* Header */}
             <div className="flex items-center gap-4">
-                <button
-                    onClick={() => navigate('/')}
-                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
-                >
+                <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
                     <ArrowLeft className="w-5 h-5" />
-                </button>
+                </Button>
                 <div className="flex-1">
                     {editingName ? (
                         <div className="flex items-center gap-2">
-                            <input
+                            <Input
                                 type="text"
                                 value={newName}
                                 onChange={(e) => setNewName(e.target.value)}
-                                className="text-2xl font-bold text-gray-900 bg-transparent border-b-2 border-blue-500 focus:outline-none"
+                                className="text-2xl font-serif bg-transparent border-b border-stone-300 dark:border-stone-700 focus:border-stone-900 dark:focus:border-stone-100"
                                 autoFocus
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') handleSaveName();
                                     if (e.key === 'Escape') setEditingName(false);
                                 }}
                             />
-                            <button
+                            <Button
+                                variant="ghost"
+                                size="icon"
                                 onClick={handleSaveName}
-                                className="p-1 text-green-600 hover:bg-green-50 rounded"
+                                className="text-emerald-600"
                             >
                                 <Check className="w-5 h-5" />
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
                                 onClick={() => setEditingName(false)}
-                                className="p-1 text-gray-400 hover:bg-gray-100 rounded"
                             >
                                 <X className="w-5 h-5" />
-                            </button>
+                            </Button>
                         </div>
                     ) : (
                         <button
                             onClick={startEditingName}
-                            className="text-2xl font-bold text-gray-900 hover:text-blue-600 text-left"
+                            className="text-2xl font-serif text-stone-900 dark:text-stone-100 hover:text-stone-700 dark:hover:text-stone-300 transition-colors text-left"
                         >
                             {trip.name}
                         </button>
@@ -157,142 +170,165 @@ export function TripDetail() {
                 </div>
             </div>
 
-            <div className="flex border-b border-gray-200">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab.key}
-                        onClick={() => setActiveTab(tab.key)}
-                        className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                            activeTab === tab.key
-                                ? 'border-blue-500 text-blue-600'
-                                : 'border-transparent text-gray-500 hover:text-gray-700'
-                        }`}
+            {/* Tabs */}
+            <Tabs defaultValue="expenses" className="w-full">
+                <TabsList className="w-full grid grid-cols-3 border-b border-stone-200 dark:border-stone-800 rounded-none bg-transparent p-0 h-auto">
+                    <TabsTrigger
+                        value="expenses"
+                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-stone-900 dark:data-[state=active]:border-stone-100 data-[state=active]:bg-transparent px-0 py-3"
                     >
-                        {tab.icon}
-                        {tab.label}
-                        {tab.key === 'people' && (
-                            <span className="ml-1 px-2 py-0.5 text-xs bg-gray-100 rounded-full">
-                                {trip.people.length}
-                            </span>
-                        )}
-                        {tab.key === 'expenses' && (
-                            <span className="ml-1 px-2 py-0.5 text-xs bg-gray-100 rounded-full">
-                                {trip.expenses.length}
-                            </span>
-                        )}
-                    </button>
-                ))}
-            </div>
+                        <Receipt className="w-4 h-4 mr-2" />
+                        Expenses
+                        <Badge variant="secondary" className="ml-2">
+                            {trip.expenses.length}
+                        </Badge>
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="people"
+                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-stone-900 dark:data-[state=active]:border-stone-100 data-[state=active]:bg-transparent px-0 py-3"
+                    >
+                        <Users className="w-4 h-4 mr-2" />
+                        People
+                        <Badge variant="secondary" className="ml-2">
+                            {trip.people.length}
+                        </Badge>
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="settlement"
+                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-stone-900 dark:data-[state=active]:border-stone-100 data-[state=active]:bg-transparent px-0 py-3"
+                    >
+                        <Calculator className="w-4 h-4 mr-2" />
+                        Settlement
+                    </TabsTrigger>
+                </TabsList>
 
-            {activeTab === 'people' && (
-                <div className="space-y-4">
+                {/* People Tab */}
+                <TabsContent value="people" className="space-y-6 mt-6">
                     {trip.people.length === 0 ? (
-                        <div className="text-center py-8 bg-white rounded-lg border border-gray-200">
-                            <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                            <p className="text-gray-500">Add people to this trip to get started</p>
-                        </div>
-                    ) : (
-                        <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
-                            {trip.people.map((person, index) => (
-                                <div
-                                    key={person.name}
-                                    className="p-4 flex items-center justify-between"
-                                >
-                                    {editingPersonIndex === index && editingPersonData ? (
-                                        <div className="flex-1 flex items-center gap-3">
-                                            <input
-                                                type="text"
-                                                value={editingPersonData.name}
-                                                onChange={(e) =>
-                                                    setEditingPersonData({
-                                                        ...editingPersonData,
-                                                        name: e.target.value,
-                                                    })
-                                                }
-                                                className="px-2 py-1 border border-gray-300 rounded"
-                                            />
-                                            <input
-                                                type="number"
-                                                min="1"
-                                                value={editingPersonData.count}
-                                                onChange={(e) =>
-                                                    setEditingPersonData({
-                                                        ...editingPersonData,
-                                                        count: Math.max(
-                                                            1,
-                                                            parseInt(e.target.value) || 1
-                                                        ),
-                                                    })
-                                                }
-                                                className="w-16 px-2 py-1 border border-gray-300 rounded"
-                                            />
-                                            <button
-                                                onClick={handleSavePerson}
-                                                className="p-1 text-green-600 hover:bg-green-50 rounded"
-                                            >
-                                                <Check className="w-5 h-5" />
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    setEditingPersonIndex(null);
-                                                    setEditingPersonData(null);
-                                                }}
-                                                className="p-1 text-gray-400 hover:bg-gray-100 rounded"
-                                            >
-                                                <X className="w-5 h-5" />
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <div>
-                                                <span className="font-medium text-gray-900">
-                                                    {person.name}
-                                                </span>
-                                                {person.count > 1 && (
-                                                    <span className="ml-2 text-sm text-gray-500">
-                                                        (count: {person.count})
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => handleEditPerson(index)}
-                                                    className="p-2 text-gray-400 hover:text-blue-500"
-                                                >
-                                                    <Pencil className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDeletePerson(index)}
-                                                    className="p-2 text-gray-400 hover:text-red-500"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </>
-                                    )}
+                        <Card className="py-12">
+                            <CardContent>
+                                <div className="text-center">
+                                    <Users className="w-8 h-8 mx-auto text-stone-300 dark:text-stone-700 mb-4" />
+                                    <p className="text-stone-500 dark:text-stone-400 mb-4">
+                                        Add people to this trip
+                                    </p>
                                 </div>
-                            ))}
-                        </div>
+                            </CardContent>
+                        </Card>
+                    ) : (
+                        <Card>
+                            <CardContent className="p-0 divide-y divide-stone-100 dark:divide-stone-800">
+                                {trip.people.map((person, index) => (
+                                    <div
+                                        key={person.name}
+                                        className="p-4 flex items-center justify-between"
+                                    >
+                                        {editingPersonIndex === index && editingPersonData ? (
+                                            <div className="flex-1 flex items-center gap-3">
+                                                <Input
+                                                    type="text"
+                                                    value={editingPersonData.name}
+                                                    onChange={(e) =>
+                                                        setEditingPersonData({
+                                                            ...editingPersonData,
+                                                            name: e.target.value,
+                                                        })
+                                                    }
+                                                    className="max-w-[180px]"
+                                                />
+                                                <Input
+                                                    type="number"
+                                                    min="1"
+                                                    value={editingPersonData.count}
+                                                    onChange={(e) =>
+                                                        setEditingPersonData({
+                                                            ...editingPersonData,
+                                                            count: Math.max(
+                                                                1,
+                                                                parseInt(e.target.value) || 1
+                                                            ),
+                                                        })
+                                                    }
+                                                    className="w-16"
+                                                />
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={handleSavePerson}
+                                                    className="text-emerald-600"
+                                                >
+                                                    <Check className="w-5 h-5" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => {
+                                                        setEditingPersonIndex(null);
+                                                        setEditingPersonData(null);
+                                                    }}
+                                                >
+                                                    <X className="w-5 h-5" />
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="w-10 h-10 flex items-center justify-center bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100 font-medium">
+                                                        {person.name.charAt(0)}
+                                                    </span>
+                                                    <div>
+                                                        <span className="font-medium text-stone-900 dark:text-stone-100">
+                                                            {person.name}
+                                                        </span>
+                                                        {person.count > 1 && (
+                                                            <Badge
+                                                                variant="secondary"
+                                                                className="ml-2"
+                                                            >
+                                                                ×{person.count}
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => handleEditPerson(index)}
+                                                    >
+                                                        <Pencil className="w-4 h-4" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => handleDeletePerson(index)}
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
                     )}
 
                     <PersonForm onAdd={addPerson} existingNames={trip.people.map((p) => p.name)} />
-                </div>
-            )}
+                </TabsContent>
 
-            {activeTab === 'expenses' && (
-                <div className="space-y-4">
+                {/* Expenses Tab */}
+                <TabsContent value="expenses" className="space-y-6 mt-6">
                     {trip.people.length === 0 ? (
-                        <div className="text-center py-8 bg-white rounded-lg border border-gray-200">
-                            <p className="text-gray-500">
-                                Add people to this trip before adding expenses
-                            </p>
-                            <button
-                                onClick={() => setActiveTab('people')}
-                                className="mt-2 text-blue-600 hover:underline"
-                            >
-                                Go to People tab
-                            </button>
-                        </div>
+                        <Card className="py-12">
+                            <CardContent>
+                                <div className="text-center">
+                                    <p className="text-stone-500 dark:text-stone-400 mb-4">
+                                        Add people first
+                                    </p>
+                                </div>
+                            </CardContent>
+                        </Card>
                     ) : showExpenseForm ? (
                         <ExpenseForm
                             people={trip.people}
@@ -305,79 +341,92 @@ export function TripDetail() {
                         />
                     ) : (
                         <>
-                            <button
+                            <Button
+                                variant="outline"
                                 onClick={() => setShowExpenseForm(true)}
-                                className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-blue-400 hover:text-blue-600 transition-colors"
+                                className="w-full h-12 border-dashed"
                             >
-                                + Add Expense
-                            </button>
+                                <Plus className="w-4 h-4 mr-2" />
+                                Add Expense
+                            </Button>
 
                             {trip.expenses.length === 0 ? (
-                                <div className="text-center py-8 bg-white rounded-lg border border-gray-200">
-                                    <Receipt className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                                    <p className="text-gray-500">No expenses yet</p>
-                                </div>
+                                <Card className="py-12">
+                                    <CardContent>
+                                        <div className="text-center">
+                                            <Receipt className="w-8 h-8 mx-auto text-stone-300 dark:text-stone-700 mb-4" />
+                                            <p className="text-stone-500 dark:text-stone-400">
+                                                No expenses yet
+                                            </p>
+                                        </div>
+                                    </CardContent>
+                                </Card>
                             ) : (
-                                <div className="space-y-3">
+                                <div className="space-y-0">
                                     {trip.expenses.map((expense) => (
-                                        <div
+                                        <article
                                             key={expense.id}
-                                            className="bg-white rounded-lg p-4 shadow-sm border border-gray-200"
+                                            className="border-b border-stone-200 dark:border-stone-800 py-4 hover:bg-stone-50 dark:hover:bg-stone-900/50 transition-colors -mx-6 px-6"
                                         >
-                                            <div className="flex items-start justify-between">
-                                                <div className="flex-1">
-                                                    <h4 className="font-medium text-gray-900">
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="font-medium text-stone-900 dark:text-stone-100">
                                                         {expense.description}
                                                     </h4>
-                                                    <p className="text-sm text-gray-500">
-                                                        Paid by{' '}
-                                                        <span className="font-medium">
-                                                            {expense.paidBy}
-                                                        </span>
+                                                    <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
+                                                        Paid by {expense.paidBy}
                                                     </p>
-                                                    <p className="text-sm text-gray-500">
-                                                        For: {expense.paidFor.join(', ')}
-                                                    </p>
-                                                    {expense.items && expense.items.length > 0 && (
-                                                        <div className="mt-2 text-xs text-gray-400">
-                                                            {expense.items.length} itemized item(s)
-                                                        </div>
-                                                    )}
+                                                    <div className="flex flex-wrap gap-1.5 mt-2">
+                                                        {expense.paidFor.map((person) => (
+                                                            <Badge
+                                                                key={person}
+                                                                variant="secondary"
+                                                                className="text-xs"
+                                                            >
+                                                                {person}
+                                                            </Badge>
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                                <div className="text-right">
-                                                    <p className="text-lg font-bold text-gray-900">
+                                                <div className="flex items-center gap-4">
+                                                    <span className="text-lg font-medium text-stone-900 dark:text-stone-100">
                                                         ${expense.amount.toFixed(2)}
-                                                    </p>
-                                                    <div className="flex items-center gap-1 mt-2">
-                                                        <button
+                                                    </span>
+                                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
                                                             onClick={() =>
                                                                 handleEditExpense(expense)
                                                             }
-                                                            className="p-1.5 text-gray-400 hover:text-blue-500"
                                                         >
                                                             <Pencil className="w-4 h-4" />
-                                                        </button>
-                                                        <button
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
                                                             onClick={() =>
                                                                 handleDeleteExpense(expense)
                                                             }
-                                                            className="p-1.5 text-gray-400 hover:text-red-500"
                                                         >
                                                             <Trash2 className="w-4 h-4" />
-                                                        </button>
+                                                        </Button>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </article>
                                     ))}
                                 </div>
                             )}
                         </>
                     )}
-                </div>
-            )}
+                </TabsContent>
 
-            {activeTab === 'settlement' && <SettlementView trip={trip} />}
+                {/* Settlement Tab */}
+                <TabsContent value="settlement" className="mt-6">
+                    <SettlementView trip={trip} />
+                </TabsContent>
+            </Tabs>
         </div>
     );
 }

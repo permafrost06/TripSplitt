@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import type { Person } from '../types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface PersonFormProps {
     onAdd: (person: Person) => void;
@@ -36,82 +40,73 @@ export function PersonForm({ onAdd, existingNames }: PersonFormProps) {
 
     if (!showForm) {
         return (
-            <button
-                onClick={() => setShowForm(true)}
-                className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-            >
-                <Plus className="w-5 h-5" />
+            <Button variant="outline" onClick={() => setShowForm(true)} className="gap-2">
+                <Plus className="w-4 h-4" />
                 Add Person
-            </button>
+            </Button>
         );
     }
 
     return (
-        <form onSubmit={handleSubmit} className="bg-gray-50 rounded-lg p-4 space-y-4">
-            <div className="flex items-center justify-between">
-                <h4 className="font-medium text-gray-900">Add Person</h4>
-                <button
-                    type="button"
-                    onClick={() => {
-                        setShowForm(false);
-                        setName('');
-                        setCount(1);
-                        setError('');
-                    }}
-                    className="text-gray-400 hover:text-gray-600"
-                >
-                    <X className="w-5 h-5" />
-                </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label
-                        htmlFor="personName"
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                        Name
-                    </label>
-                    <input
-                        id="personName"
-                        type="text"
-                        value={name}
-                        onChange={(e) => {
-                            setName(e.target.value);
+        <Card>
+            <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                    <CardTitle>Add Person</CardTitle>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                            setShowForm(false);
+                            setName('');
+                            setCount(1);
                             setError('');
                         }}
-                        placeholder="e.g., John or John+Jane"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        autoFocus
-                    />
-                </div>
-                <div>
-                    <label
-                        htmlFor="personCount"
-                        className="block text-sm font-medium text-gray-700 mb-1"
                     >
-                        Count
-                    </label>
-                    <input
-                        id="personCount"
-                        type="number"
-                        min="1"
-                        value={count}
-                        onChange={(e) => setCount(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Use 2+ for couples</p>
+                        <X className="w-5 h-5" />
+                    </Button>
                 </div>
-            </div>
+            </CardHeader>
+            <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="personName">Name</Label>
+                            <Input
+                                id="personName"
+                                type="text"
+                                value={name}
+                                onChange={(e) => {
+                                    setName(e.target.value);
+                                    setError('');
+                                }}
+                                placeholder="Name"
+                                autoFocus
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="personCount">Count</Label>
+                            <Input
+                                id="personCount"
+                                type="number"
+                                min="1"
+                                value={count}
+                                onChange={(e) =>
+                                    setCount(Math.max(1, parseInt(e.target.value) || 1))
+                                }
+                            />
+                            <p className="text-xs text-stone-500 dark:text-stone-400">
+                                Use 2+ for couples
+                            </p>
+                        </div>
+                    </div>
 
-            {error && <p className="text-sm text-red-600">{error}</p>}
+                    {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
-            <button
-                type="submit"
-                className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-            >
-                Add Person
-            </button>
-        </form>
+                    <Button type="submit" className="w-full">
+                        Add Person
+                    </Button>
+                </form>
+            </CardContent>
+        </Card>
     );
 }
