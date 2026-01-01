@@ -386,15 +386,25 @@ export function TripDetail() {
                                                         Paid by {expense.paidBy}
                                                     </p>
                                                     <div className="flex flex-wrap gap-1.5 mt-2">
-                                                        {expense.paidFor.map((person) => (
-                                                            <Badge
-                                                                key={person}
-                                                                variant="secondary"
-                                                                className="text-xs"
-                                                            >
-                                                                {person}
+                                                        {expense.items ? (
+                                                            <Badge className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300">
+                                                                Itemized
                                                             </Badge>
-                                                        ))}
+                                                        ) : expense.paidFor.length ===
+                                                          trip.people.length ? (
+                                                            <Badge className="bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300">
+                                                                Everyone
+                                                            </Badge>
+                                                        ) : (
+                                                            expense.paidFor.map((person) => (
+                                                                <Badge
+                                                                    key={person}
+                                                                    className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
+                                                                >
+                                                                    {person}
+                                                                </Badge>
+                                                            ))
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="flex flex-col items-end gap-2">
