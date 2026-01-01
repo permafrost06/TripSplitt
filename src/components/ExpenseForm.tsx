@@ -248,19 +248,19 @@ export function ExpenseForm({
                                         key={index}
                                         className="p-4 border border-stone-200 dark:border-stone-800 space-y-3"
                                     >
-                                        <div className="flex items-start gap-2">
-                                            <div className="flex-1 grid grid-cols-2 gap-2">
-                                                <Input
-                                                    type="text"
-                                                    value={item.description}
-                                                    onChange={(e) =>
-                                                        updateItem(index, {
-                                                            description: e.target.value,
-                                                        })
-                                                    }
-                                                    placeholder="Item description"
-                                                    className="h-9 text-sm"
-                                                />
+                                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+                                            <Input
+                                                type="text"
+                                                value={item.description}
+                                                onChange={(e) =>
+                                                    updateItem(index, {
+                                                        description: e.target.value,
+                                                    })
+                                                }
+                                                placeholder="Item description"
+                                                className="h-9 text-sm flex-1"
+                                            />
+                                            <div className="flex justify-end items-center gap-1 sm:shrink-0">
                                                 <Input
                                                     type="number"
                                                     step="0.01"
@@ -272,18 +272,18 @@ export function ExpenseForm({
                                                         })
                                                     }
                                                     placeholder="0.00"
-                                                    className="h-9 text-sm"
+                                                    className="h-9 text-sm w-16 text-right [-moz-appearance:textfield]"
                                                 />
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => removeItem(index)}
+                                                    className="h-9 w-8 shrink-0"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
                                             </div>
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => removeItem(index)}
-                                                className="h-9 w-9"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
                                         </div>
                                         <div className="flex flex-wrap gap-1.5">
                                             {people.map((person) => (
