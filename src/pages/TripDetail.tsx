@@ -348,14 +348,16 @@ export function TripDetail() {
                         />
                     ) : (
                         <>
-                            <Button
-                                variant="outline"
-                                onClick={() => setShowExpenseForm(true)}
-                                className="w-full h-12 border-dashed"
-                            >
-                                <Plus className="w-4 h-4 mr-2" />
-                                Add Expense
-                            </Button>
+                            <div className="sticky top-[72px] z-10 bg-stone-50 dark:bg-stone-950 pt-2 pb-4 -mx-6 px-6 border-b border-stone-200 dark:border-stone-800">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setShowExpenseForm(true)}
+                                    className="w-full h-12 border-dashed"
+                                >
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Add Expense
+                                </Button>
+                            </div>
 
                             {trip.expenses.length === 0 ? (
                                 <Card className="py-12">
