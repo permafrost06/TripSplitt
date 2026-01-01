@@ -95,6 +95,14 @@ export function TripDetail() {
 
     const isItemizedExpanded = (expenseId: string) => expandedItems.has(expenseId);
 
+    const getAbbreviatedName = (name: string): string => {
+        const parts = name.split(/[\s,+]+/).filter(Boolean);
+        if (parts.length > 1) {
+            return parts.map((part) => part.charAt(0).toUpperCase()).join('');
+        }
+        return name.substring(0, 2).toUpperCase();
+    };
+
     const handleAddExpense = async (expense: Expense) => {
         if (editingExpense) {
             await updateExpense(editingExpense.id, expense);
@@ -305,7 +313,7 @@ export function TripDetail() {
                                             <>
                                                 <div className="flex items-center gap-3">
                                                     <span className="w-10 h-10 flex items-center justify-center bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100 font-medium">
-                                                        {person.name.charAt(0)}
+                                                        {getAbbreviatedName(person.name)}
                                                     </span>
                                                     <div>
                                                         <span className="font-medium text-stone-900 dark:text-stone-100">
@@ -513,8 +521,8 @@ export function TripDetail() {
                                                                                     variant="secondary"
                                                                                     className="text-[10px] px-1.5 py-0"
                                                                                 >
-                                                                                    {person.charAt(
-                                                                                        0
+                                                                                    {getAbbreviatedName(
+                                                                                        person
                                                                                     )}
                                                                                 </Badge>
                                                                             )
