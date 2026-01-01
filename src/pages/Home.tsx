@@ -165,15 +165,15 @@ export function Home() {
                                         </Badge>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-3">
                                     <button
                                         onClick={(e) => handleDeleteTrip(e, trip.id, trip.name)}
-                                        className="p-2 text-stone-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                                        className="p-2 text-stone-400 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer"
                                         title="Delete trip"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>
-                                    <ArrowRight className="w-5 h-5 text-stone-300 group-hover:text-stone-500 transition-colors" />
+                                    <ArrowRight className="w-5 h-5 text-stone-300 transition-colors" />
                                 </div>
                             </Link>
                         </div>
