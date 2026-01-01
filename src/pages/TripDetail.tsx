@@ -411,11 +411,11 @@ export function TripDetail() {
                                             onClick={() =>
                                                 expense.items && toggleExpandedItems(expense.id)
                                             }
-                                            className={`group border-b border-stone-200 dark:border-stone-800 py-4 -mx-6 px-6 cursor-pointer ${
+                                            className={`group border-b border-stone-200 dark:border-stone-800 py-4 -mx-6 px-6 ${
                                                 expense.items
-                                                    ? 'hover:bg-stone-100 dark:hover:bg-stone-800/50'
-                                                    : 'hover:bg-stone-50 dark:hover:bg-stone-900/50'
-                                            } ${expense.items ? 'bg-stone-50/50 dark:bg-stone-900/30' : ''}`}
+                                                    ? 'cursor-pointer hover:bg-stone-100 dark:hover:bg-stone-800/50 bg-stone-50/50 dark:bg-stone-900/30'
+                                                    : ''
+                                            }`}
                                         >
                                             <div className="flex items-start justify-between gap-4">
                                                 <div className="flex-1 min-w-0">
