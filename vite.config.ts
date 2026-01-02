@@ -3,6 +3,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import wasm from 'vite-plugin-wasm';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -11,12 +12,16 @@ export default defineConfig({
             '@': path.resolve(__dirname, './src'),
         },
     },
+    optimizeDeps: {
+        exclude: ['brotli-wasm'],
+    },
     plugins: [
+        wasm(),
         react(),
         tailwindcss(),
         VitePWA({
             registerType: 'prompt',
-            includeAssets: ['favicon.svg', 'apple-touch-icon.svg'],
+            includeAssets: ['favicon.svg', 'apple-touch-icon.svg', '**/*.wasm'],
             manifest: {
                 name: 'TripSplitt',
                 short_name: 'TripSplitt',
