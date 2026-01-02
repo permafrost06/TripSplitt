@@ -11,12 +11,15 @@ import {
     Calculator,
     Plus,
     ChevronDown,
+    Share2,
 } from 'lucide-react';
 import { useTrip } from '../hooks/useTrips';
 import { PersonForm } from '../components/PersonForm';
 import { ExpenseForm } from '../components/ExpenseForm';
 import { SettlementView } from '../components/SettlementView';
 import type { Expense, Person } from '../types';
+import { compressTripData, arrayBufferToBase64Url } from '../lib/compression';
+import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -46,6 +49,8 @@ export function TripDetail() {
     const [editingName, setEditingName] = useState(false);
     const [newName, setNewName] = useState('');
     const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+    const [showShareModal, setShowShareModal] = useState(false);
+    const [shareUrl, setShareUrl] = useState('');
 
     useEffect(() => {
         if (trip) {
@@ -156,6 +161,14 @@ export function TripDetail() {
         setEditingName(true);
     };
 
+    const handleShare = async () => {
+        const compressed = await compressTripData(trip);
+        const base64Url = arrayBufferToBase64Url(compressed);
+        const url = `${window.location.origin}/?trip=${base64Url}`;
+        setShareUrl(url);
+        setShowShareModal(true);
+    };
+
     return (
         <div className="space-y-12">
             {/* Header */}
@@ -205,9 +218,61 @@ export function TripDetail() {
                         <Badge variant="secondary" className="text-sm">
                             {formatCurrency(0, trip.currency).replace('0.00', '').trim()}
                         </Badge>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleShare}
+                            className="text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 cursor-pointer"
+                        >
+                            <Share2 className="w-4 h-4" />
+                        </Button>
                     </div>
                 </div>
             </div>
+
+            {showShareModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/50 dark:bg-black/50">
+                    <div className="relative w-full max-w-md p-6 bg-white dark:bg-stone-900 rounded-none shadow-xl">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-lg font-serif text-stone-900 dark:text-stone-100">
+                                Share Trip
+                            </h2>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setShowShareModal(false)}
+                                className="cursor-pointer"
+                            >
+                                <X className="w-5 h-5" />
+                            </Button>
+                        </div>
+                        <div className="flex flex-col items-center gap-4">
+                            <div className="bg-white dark:bg-white p-4 rounded-lg">
+                                <QRCodeSVG
+                                    value={shareUrl}
+                                    size={280}
+                                    level="M"
+                                    includeMargin={false}
+                                    bgColor="#ffffff"
+                                    fgColor="#000000"
+                                />
+                            </div>
+                            <p className="text-sm text-stone-500 dark:text-stone-400 text-center">
+                                Scan to import this trip
+                            </p>
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    navigator.clipboard.writeText(shareUrl);
+                                }}
+                                className="w-full cursor-pointer"
+                            >
+                                Copy Link
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Tabs */}
             <Tabs defaultValue="expenses" className="w-full">
