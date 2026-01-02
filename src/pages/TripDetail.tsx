@@ -231,7 +231,7 @@ export function TripDetail() {
             </div>
 
             {showShareModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/50 dark:bg-black/50">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/50 dark:bg-black/50 mb-0">
                     <div className="relative w-full max-w-md p-6 bg-white dark:bg-stone-900 rounded-none shadow-xl">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-serif text-stone-900 dark:text-stone-100">
