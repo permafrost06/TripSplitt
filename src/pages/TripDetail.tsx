@@ -164,7 +164,7 @@ export function TripDetail() {
     const handleShare = async () => {
         const compressed = await compressTripData(trip);
         const base64Url = arrayBufferToBase64Url(compressed);
-        const url = `${window.location.origin}/?trip=${base64Url}`;
+        const url = `${window.location.origin}/i?d=${base64Url}`;
         setShareUrl(url);
         setShowShareModal(true);
     };

@@ -75,6 +75,21 @@ export function decompressTrip(
     };
 }
 
+export function createTripFromSharedData(data: CompressedTripData, id?: string): Trip {
+    const decompressed = decompressTrip(data);
+    const now = Date.now();
+
+    return {
+        id: id || crypto.randomUUID(),
+        name: `${decompressed.name} (Shared)`,
+        currency: decompressed.currency,
+        people: decompressed.people,
+        expenses: decompressed.expenses,
+        createdAt: now,
+        updatedAt: now,
+    };
+}
+
 export async function compressTripData(trip: Trip): Promise<Uint8Array> {
     const json = JSON.stringify(compressTrip(trip));
     return brotli.compress(new TextEncoder().encode(json));
