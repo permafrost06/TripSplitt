@@ -12,6 +12,7 @@ import {
     Plus,
     ChevronDown,
     Share2,
+    Copy,
 } from 'lucide-react';
 import { useTrip } from '../hooks/useTrips';
 import { PersonForm } from '../components/PersonForm';
@@ -267,15 +268,21 @@ export function TripDetail() {
                             <p className="text-sm text-stone-500 dark:text-stone-400 text-center">
                                 Scan to import this trip
                             </p>
-                            <Button
-                                variant="outline"
-                                onClick={() => {
-                                    navigator.clipboard.writeText(shareUrl);
-                                }}
-                                className="w-full cursor-pointer"
-                            >
-                                Copy Link
-                            </Button>
+                            <div className="w-full flex items-center gap-2">
+                                <code className="flex-1 text-xs text-stone-600 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 px-3 py-2 rounded truncate">
+                                    {shareUrl}
+                                </code>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(shareUrl);
+                                    }}
+                                    className="shrink-0 cursor-pointer"
+                                >
+                                    <Copy className="w-4 h-4" />
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>
