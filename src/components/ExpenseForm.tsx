@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Plus, X, Trash2 } from 'lucide-react';
-import type { Person, Expense, ExpenseItem } from '../types';
+import { X } from 'lucide-react';
+import type { Person, Expense } from '../types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
     Select,
     SelectContent,
@@ -13,7 +12,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import type { Currency } from '@/types';
 
 interface ExpenseFormProps {
@@ -37,10 +36,6 @@ export function ExpenseForm({
     const [paidFor, setPaidFor] = useState<string[]>(
         initialExpense?.paidFor || people.map((p) => p.name)
     );
-    const [showItems, setShowItems] = useState(
-        initialExpense?.items ? initialExpense.items.length > 0 : false
-    );
-    const [items, setItems] = useState<ExpenseItem[]>(initialExpense?.items || []);
     const [error, setError] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -67,61 +62,21 @@ export function ExpenseForm({
             return;
         }
 
-        if (showItems) {
-            const itemsTotal = items.reduce((sum, item) => sum + item.amount, 0);
-            if (Math.abs(itemsTotal - parsedAmount) > 0.01) {
-                setError(
-                    `Items total (${itemsTotal.toFixed(2)}) doesn't match (${parsedAmount.toFixed(2)})`
-                );
-                return;
-            }
-
-            for (const item of items) {
-                if (!item.description.trim() || item.amount <= 0 || item.paidFor.length === 0) {
-                    setError('All items need description, amount, and person');
-                    return;
-                }
-            }
-        }
-
         const expense: Expense = {
             id: initialExpense?.id || crypto.randomUUID(),
             description: description.trim(),
             amount: parsedAmount,
             paidBy,
             paidFor,
-            items: showItems && items.length > 0 ? items : undefined,
         };
 
         onAdd(expense);
-    };
-
-    const addItem = () => {
-        setItems([...items, { description: '', amount: 0, paidFor: people.map((p) => p.name) }]);
-    };
-
-    const updateItem = (index: number, updates: Partial<ExpenseItem>) => {
-        const newItems = [...items];
-        newItems[index] = { ...newItems[index], ...updates };
-        setItems(newItems);
-    };
-
-    const removeItem = (index: number) => {
-        setItems(items.filter((_, i) => i !== index));
     };
 
     const togglePaidFor = (personName: string) => {
         setPaidFor((prev) =>
             prev.includes(personName) ? prev.filter((p) => p !== personName) : [...prev, personName]
         );
-    };
-
-    const toggleItemPaidFor = (itemIndex: number, personName: string) => {
-        const item = items[itemIndex];
-        const newPaidFor = item.paidFor.includes(personName)
-            ? item.paidFor.filter((p) => p !== personName)
-            : [...item.paidFor, personName];
-        updateItem(itemIndex, { paidFor: newPaidFor });
     };
 
     return (
@@ -215,128 +170,6 @@ export function ExpenseForm({
                                 </button>
                             ))}
                         </div>
-                    </div>
-
-                    <div className="border-t border-stone-200 dark:border-stone-800 pt-5">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Checkbox
-                                id="itemize"
-                                checked={showItems}
-                                onCheckedChange={(checked) => setShowItems(checked === true)}
-                            />
-                            <Label htmlFor="itemize" className="cursor-pointer">
-                                Itemize expense
-                            </Label>
-                        </div>
-
-                        {showItems && (
-                            <div className="space-y-3">
-                                <div className="sticky top-[72px] z-10 bg-white dark:bg-stone-950 pt-2 pb-2 -mx-4 px-4">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={addItem}
-                                        className="w-full h-9 gap-1"
-                                    >
-                                        <Plus className="w-4 h-4" />
-                                        Add Item
-                                    </Button>
-                                </div>
-
-                                {items.map((item, index) => (
-                                    <div
-                                        key={index}
-                                        className="p-4 border border-stone-200 dark:border-stone-800 space-y-3"
-                                    >
-                                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
-                                            <Input
-                                                type="text"
-                                                value={item.description}
-                                                onChange={(e) =>
-                                                    updateItem(index, {
-                                                        description: e.target.value,
-                                                    })
-                                                }
-                                                placeholder="Item description"
-                                                className="h-9 text-sm flex-1"
-                                            />
-                                            <div className="flex justify-end items-center gap-1 sm:shrink-0">
-                                                <Input
-                                                    type="number"
-                                                    step="0.01"
-                                                    min="0"
-                                                    value={item.amount || ''}
-                                                    onChange={(e) =>
-                                                        updateItem(index, {
-                                                            amount: parseFloat(e.target.value) || 0,
-                                                        })
-                                                    }
-                                                    placeholder="0.00"
-                                                    className="h-9 text-sm w-16 text-right [-moz-appearance:textfield]"
-                                                />
-                                                <Button
-                                                    type="button"
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => removeItem(index)}
-                                                    className="h-9 w-8 shrink-0"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-wrap gap-1.5">
-                                            {people.map((person) => (
-                                                <button
-                                                    key={person.name}
-                                                    type="button"
-                                                    onClick={() =>
-                                                        toggleItemPaidFor(index, person.name)
-                                                    }
-                                                    className={cn(
-                                                        'px-2.5 py-1 text-xs transition-colors border cursor-pointer',
-                                                        item.paidFor.includes(person.name)
-                                                            ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 border-stone-900 dark:border-stone-100'
-                                                            : 'bg-transparent text-stone-600 dark:text-stone-400 border-stone-300 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800'
-                                                    )}
-                                                >
-                                                    {person.name}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))}
-
-                                {items.length > 0 && (
-                                    <div className="text-sm text-right">
-                                        <span className="text-stone-500">Items: </span>
-                                        <span className="font-medium">
-                                            {formatCurrency(
-                                                items.reduce((sum, item) => sum + item.amount, 0),
-                                                currency
-                                            )}
-                                        </span>
-                                        {amount && (
-                                            <span
-                                                className={cn(
-                                                    'ml-2',
-                                                    Math.abs(
-                                                        items.reduce(
-                                                            (sum, item) => sum + item.amount,
-                                                            0
-                                                        ) - parseFloat(amount)
-                                                    ) > 0.01
-                                                        ? 'text-red-600'
-                                                        : 'text-emerald-600'
-                                                )}
-                                            >
-                                                / {formatCurrency(parseFloat(amount), currency)}
-                                            </span>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        )}
                     </div>
 
                     {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}

@@ -16,6 +16,7 @@ import {
 import { useTrip } from '../hooks/useTrips';
 import { PersonForm } from '../components/PersonForm';
 import { ExpenseForm } from '../components/ExpenseForm';
+import { GroupExpenseForm } from '../components/GroupExpenseForm';
 import { SettlementView } from '../components/SettlementView';
 import type { Expense, Person } from '../types';
 import { compressTripData, arrayBufferToBase64Url } from '../lib/compression';
@@ -43,6 +44,7 @@ export function TripDetail() {
     } = useTrip(id);
 
     const [showExpenseForm, setShowExpenseForm] = useState(false);
+    const [showGroupExpenseForm, setShowGroupExpenseForm] = useState(false);
     const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
     const [editingPersonIndex, setEditingPersonIndex] = useState<number | null>(null);
     const [editingPersonData, setEditingPersonData] = useState<Person | null>(null);
@@ -116,11 +118,16 @@ export function TripDetail() {
             await addExpense(expense);
         }
         setShowExpenseForm(false);
+        setShowGroupExpenseForm(false);
     };
 
     const handleEditExpense = (expense: Expense) => {
         setEditingExpense(expense);
-        setShowExpenseForm(true);
+        if (expense.items && expense.items.length > 0) {
+            setShowGroupExpenseForm(true);
+        } else {
+            setShowExpenseForm(true);
+        }
     };
 
     const handleDeleteExpense = async (expense: Expense) => {
@@ -231,7 +238,7 @@ export function TripDetail() {
             </div>
 
             {showShareModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/50 dark:bg-black/50 mb-0">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/50 dark:bg-black/50">
                     <div className="relative w-full max-w-md p-6 bg-white dark:bg-stone-900 rounded-none shadow-xl">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-serif text-stone-900 dark:text-stone-100">
@@ -444,9 +451,20 @@ export function TripDetail() {
                             initialExpense={editingExpense || undefined}
                             currency={trip.currency}
                         />
+                    ) : showGroupExpenseForm ? (
+                        <GroupExpenseForm
+                            people={trip.people}
+                            onAdd={handleAddExpense}
+                            onCancel={() => {
+                                setShowGroupExpenseForm(false);
+                                setEditingExpense(null);
+                            }}
+                            initialExpense={editingExpense || undefined}
+                            currency={trip.currency}
+                        />
                     ) : (
                         <>
-                            <div className="sticky top-[72px] z-10 bg-stone-50 dark:bg-stone-950 pt-2 pb-4 -mx-6 px-6 border-b border-stone-200 dark:border-stone-800">
+                            <div className="sticky top-[72px] z-10 bg-stone-50 dark:bg-stone-950 pt-2 pb-4 -mx-6 px-6 border-b border-stone-200 dark:border-stone-800 space-y-3">
                                 <Button
                                     variant="outline"
                                     onClick={() => setShowExpenseForm(true)}
@@ -454,6 +472,14 @@ export function TripDetail() {
                                 >
                                     <Plus className="w-4 h-4 mr-2" />
                                     Add Expense
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setShowGroupExpenseForm(true)}
+                                    className="w-full h-12 border-dashed"
+                                >
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Add Expense Group
                                 </Button>
                             </div>
 
@@ -493,7 +519,7 @@ export function TripDetail() {
                                                     <div className="flex flex-wrap gap-1.5 mt-2">
                                                         {expense.items ? (
                                                             <Badge className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300">
-                                                                Itemized
+                                                                Grouped
                                                             </Badge>
                                                         ) : expense.paidFor.length ===
                                                           trip.people.length ? (
