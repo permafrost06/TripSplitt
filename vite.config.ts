@@ -8,10 +8,6 @@ import wasm from 'vite-plugin-wasm';
 // https://vite.dev/config/
 export default defineConfig({
     server: {
-        https: {
-            key: await import('fs').then((fs) => fs.readFileSync('/tmp/key.pem')),
-            cert: await import('fs').then((fs) => fs.readFileSync('/tmp/cert.pem')),
-        },
         host: true,
     },
     resolve: {
