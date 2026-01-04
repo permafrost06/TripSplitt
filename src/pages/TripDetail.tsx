@@ -526,7 +526,7 @@ export function TripDetail() {
                                                     <div className="flex flex-wrap gap-1.5 mt-2">
                                                         {expense.items ? (
                                                             <Badge className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300">
-                                                                Grouped
+                                                                Group
                                                             </Badge>
                                                         ) : expense.paidFor.length ===
                                                           trip.people.length ? (
