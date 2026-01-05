@@ -296,6 +296,16 @@ export function TripDetail() {
                                     <Copy className="w-4 h-4" />
                                 </Button>
                             </div>
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    setShowShareModal(false);
+                                    setShowReportModal(true);
+                                }}
+                                className="w-full cursor-pointer"
+                            >
+                                Share Report
+                            </Button>
                         </div>
                     </div>
                 </div>
