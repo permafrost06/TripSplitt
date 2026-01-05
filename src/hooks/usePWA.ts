@@ -50,7 +50,7 @@ export function usePWA() {
     }, [updateSW]);
 
     const dismissUpdate = useCallback(() => {
-        setState((prev) => ({ ...prev, needRefresh: false }));
+        setState((prev) => ({ ...prev, needRefresh: false, offlineReady: false }));
     }, []);
 
     return {
