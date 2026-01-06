@@ -5,6 +5,8 @@ interface PWAState {
     needRefresh: boolean;
     offlineReady: boolean;
     updateAvailable: boolean;
+    isInstallable: boolean;
+    deferredPrompt: any;
 }
 
 export function usePWA() {
@@ -12,6 +14,8 @@ export function usePWA() {
         needRefresh: false,
         offlineReady: false,
         updateAvailable: false,
+        isInstallable: false,
+        deferredPrompt: null,
     });
     const [updateSW, setUpdateSW] = useState<((reload?: boolean) => Promise<void>) | null>(null);
 
@@ -25,7 +29,6 @@ export function usePWA() {
             },
             onRegisteredSW(swUrl, registration) {
                 console.log('Service Worker registered:', swUrl);
-                // Check for updates periodically (every hour)
                 if (registration) {
                     setInterval(
                         () => {
@@ -41,6 +44,31 @@ export function usePWA() {
         });
 
         setUpdateSW(() => update);
+
+        const handleBeforeInstallPrompt = (e: Event) => {
+            e.preventDefault();
+            setState((prev) => ({
+                ...prev,
+                isInstallable: true,
+                deferredPrompt: e,
+            }));
+        };
+
+        const handleAppInstalled = () => {
+            setState((prev) => ({
+                ...prev,
+                isInstallable: false,
+                deferredPrompt: null,
+            }));
+        };
+
+        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        window.addEventListener('appinstalled', handleAppInstalled);
+
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+            window.removeEventListener('appinstalled', handleAppInstalled);
+        };
     }, []);
 
     const applyUpdate = useCallback(async () => {
@@ -53,9 +81,26 @@ export function usePWA() {
         setState((prev) => ({ ...prev, needRefresh: false, offlineReady: false }));
     }, []);
 
+    const installPWA = useCallback(async () => {
+        const { deferredPrompt } = state;
+        if (!deferredPrompt) return;
+
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+
+        if (outcome === 'accepted') {
+            setState((prev) => ({
+                ...prev,
+                isInstallable: false,
+                deferredPrompt: null,
+            }));
+        }
+    }, [state.deferredPrompt]);
+
     return {
         ...state,
         applyUpdate,
         dismissUpdate,
+        installPWA,
     };
 }

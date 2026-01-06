@@ -1,8 +1,13 @@
 import { Link, Outlet } from 'react-router-dom';
+import { Download } from 'lucide-react';
 import { UpdatePrompt } from './UpdatePrompt';
 import { ThemeToggle } from './ThemeToggle';
+import { usePWA } from '../hooks/usePWA';
+import { Button } from '@/components/ui/button';
 
 export function Layout() {
+    const { isInstallable, installPWA } = usePWA();
+
     return (
         <div className="min-h-screen">
             <header className="sticky top-0 z-40 border-b border-stone-200 dark:border-stone-800 bg-stone-50/80 dark:bg-stone-950/80 backdrop-blur-sm">
@@ -30,7 +35,20 @@ export function Layout() {
                             TripSplitt
                         </span>
                     </Link>
-                    <ThemeToggle />
+                    <div className="flex items-center gap-2">
+                        {isInstallable && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={installPWA}
+                                className="gap-1.5 cursor-pointer"
+                            >
+                                <Download className="w-4 h-4" />
+                                Install
+                            </Button>
+                        )}
+                        <ThemeToggle />
+                    </div>
                 </div>
             </header>
 
