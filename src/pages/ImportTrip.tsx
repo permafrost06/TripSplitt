@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Check, X, Loader2 } from 'lucide-react';
+import { Check, X, Loader2, AlertTriangle } from 'lucide-react';
 import {
     decompressTripData,
     base64UrlToArrayBuffer,
@@ -19,6 +19,8 @@ export function ImportTrip() {
     const [loading, setLoading] = useState(true);
     const [tripData, setTripData] = useState<Trip | null>(null);
     const [importing, setImporting] = useState(false);
+    const [duplicateWarning, setDuplicateWarning] = useState(false);
+    const [baseTripName, setBaseTripName] = useState('');
 
     useEffect(() => {
         const dataParam = searchParams.get('d');
@@ -33,6 +35,11 @@ export function ImportTrip() {
                 const compressed = base64UrlToArrayBuffer(dataParam);
                 const decompressed = await decompressTripData(compressed);
                 const trip = createTripFromSharedData(decompressed);
+
+                setBaseTripName(trip.name.split(' (Shared)')[0]);
+                const exists = await db.tripExistsWithName(baseTripName);
+                setDuplicateWarning(exists);
+
                 setTripData(trip);
             } catch (err) {
                 console.error('Failed to decode trip:', err);
@@ -43,7 +50,7 @@ export function ImportTrip() {
         };
 
         decodeTrip();
-    }, [searchParams]);
+    }, [searchParams, baseTripName]);
 
     const handleImport = async () => {
         if (!tripData) return;
@@ -121,6 +128,21 @@ export function ImportTrip() {
                     Review the trip data before importing
                 </p>
             </div>
+
+            {duplicateWarning && (
+                <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                    <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                    <div>
+                        <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                            Trip with this name already exists
+                        </p>
+                        <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                            A trip named "{baseTripName}" or "{baseTripName} (Shared)" already
+                            exists in your trips. Importing will create a duplicate.
+                        </p>
+                    </div>
+                </div>
+            )}
 
             <Card>
                 <CardHeader>

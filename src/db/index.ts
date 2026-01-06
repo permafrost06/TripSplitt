@@ -29,7 +29,23 @@ function getDB(): Promise<IDBPDatabase<TripSplittDB>> {
 export async function getAllTrips(): Promise<Trip[]> {
     const db = await getDB();
     const trips = await db.getAllFromIndex('trips', 'by-updated');
-    return trips.reverse(); // Most recently updated first
+    return trips.reverse();
+}
+
+export async function getTripByName(name: string): Promise<Trip | undefined> {
+    const db = await getDB();
+    const trips = await db.getAll('trips');
+    return trips.find((trip) => trip.name === name);
+}
+
+export async function tripExistsWithName(name: string): Promise<boolean> {
+    const trips = await getAllTrips();
+    return trips.some(
+        (trip) =>
+            trip.name === name ||
+            trip.name === `${name} (Shared)` ||
+            trip.name.startsWith(`${name} (`)
+    );
 }
 
 export async function getTrip(id: string): Promise<Trip | undefined> {
