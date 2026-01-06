@@ -188,6 +188,46 @@ export function useTrip(id: string | undefined) {
         [trip]
     );
 
+    const moveExpense = useCallback(
+        async (fromIndex: number, toIndex: number) => {
+            if (!trip) return;
+            const expenses = [...trip.expenses];
+            if (
+                fromIndex < 0 ||
+                toIndex < 0 ||
+                fromIndex >= expenses.length ||
+                toIndex >= expenses.length
+            )
+                return;
+            const [removed] = expenses.splice(fromIndex, 1);
+            expenses.splice(toIndex, 0, removed);
+            const updated = { ...trip, expenses };
+            await db.saveTrip(updated);
+            setTrip(updated);
+        },
+        [trip]
+    );
+
+    const movePerson = useCallback(
+        async (fromIndex: number, toIndex: number) => {
+            if (!trip) return;
+            const people = [...trip.people];
+            if (
+                fromIndex < 0 ||
+                toIndex < 0 ||
+                fromIndex >= people.length ||
+                toIndex >= people.length
+            )
+                return;
+            const [removed] = people.splice(fromIndex, 1);
+            people.splice(toIndex, 0, removed);
+            const updated = { ...trip, people };
+            await db.saveTrip(updated);
+            setTrip(updated);
+        },
+        [trip]
+    );
+
     return {
         trip,
         loading,
@@ -199,6 +239,8 @@ export function useTrip(id: string | undefined) {
         addExpense,
         updateExpense,
         removeExpense,
+        moveExpense,
+        movePerson,
         refresh: loadTrip,
     };
 }

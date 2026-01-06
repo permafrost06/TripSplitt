@@ -11,6 +11,7 @@ import {
     Calculator,
     Plus,
     ChevronDown,
+    ChevronUp,
     Share2,
     Copy,
     FileText,
@@ -43,6 +44,8 @@ export function TripDetail() {
         addExpense,
         updateExpense,
         removeExpense,
+        moveExpense,
+        movePerson,
         updateTrip,
     } = useTrip(id);
 
@@ -158,6 +161,14 @@ export function TripDetail() {
         if (confirm(`Remove "${person.name}" from this trip?`)) {
             await removePerson(index);
         }
+    };
+
+    const handleMoveExpense = async (fromIndex: number, toIndex: number) => {
+        await moveExpense(fromIndex, toIndex);
+    };
+
+    const handleMovePerson = async (fromIndex: number, toIndex: number) => {
+        await movePerson(fromIndex, toIndex);
     };
 
     const handleSaveName = async () => {
@@ -359,12 +370,12 @@ export function TripDetail() {
                     ) : (
                         <Card>
                             <CardContent className="p-0 divide-y divide-stone-100 dark:divide-stone-800">
-                                {trip.people.map((person, index) => (
+                                {trip.people.map((person, personIndex) => (
                                     <div
                                         key={person.name}
                                         className="p-4 flex items-center justify-between"
                                     >
-                                        {editingPersonIndex === index && editingPersonData ? (
+                                        {editingPersonIndex === personIndex && editingPersonData ? (
                                             <div className="flex-1 flex items-center gap-3">
                                                 <Input
                                                     type="text"
@@ -414,6 +425,39 @@ export function TripDetail() {
                                         ) : (
                                             <>
                                                 <div className="flex items-center gap-3">
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() =>
+                                                                handleMovePerson(
+                                                                    personIndex,
+                                                                    personIndex - 1
+                                                                )
+                                                            }
+                                                            disabled={personIndex === 0}
+                                                            className="h-5 w-5 cursor-pointer"
+                                                        >
+                                                            <ChevronUp className="w-3 h-3" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() =>
+                                                                handleMovePerson(
+                                                                    personIndex,
+                                                                    personIndex + 1
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                personIndex ===
+                                                                trip.people.length - 1
+                                                            }
+                                                            className="h-5 w-5 cursor-pointer"
+                                                        >
+                                                            <ChevronDown className="w-3 h-3" />
+                                                        </Button>
+                                                    </div>
                                                     <span className="w-10 h-10 flex items-center justify-center bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100 font-medium">
                                                         {getAbbreviatedName(person.name)}
                                                     </span>
@@ -435,14 +479,20 @@ export function TripDetail() {
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        onClick={() => handleEditPerson(index)}
+                                                        onClick={() =>
+                                                            handleEditPerson(personIndex)
+                                                        }
+                                                        className="cursor-pointer"
                                                     >
                                                         <Pencil className="w-4 h-4" />
                                                     </Button>
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        onClick={() => handleDeletePerson(index)}
+                                                        onClick={() =>
+                                                            handleDeletePerson(personIndex)
+                                                        }
+                                                        className="cursor-pointer"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
                                                     </Button>
@@ -526,7 +576,7 @@ export function TripDetail() {
                                 </Card>
                             ) : (
                                 <div className="space-y-0">
-                                    {trip.expenses.map((expense) => (
+                                    {trip.expenses.map((expense, expenseIndex) => (
                                         <article
                                             key={expense.id}
                                             onClick={() =>
@@ -539,33 +589,70 @@ export function TripDetail() {
                                             }`}
                                         >
                                             <div className="flex items-start justify-between gap-4">
-                                                <div className="flex-1 min-w-0">
-                                                    <h4 className="font-medium text-stone-900 dark:text-stone-100">
-                                                        {expense.description}
-                                                    </h4>
-                                                    <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
-                                                        Paid by {expense.paidBy}
-                                                    </p>
-                                                    <div className="flex flex-wrap gap-1.5 mt-2">
-                                                        {expense.items ? (
-                                                            <Badge className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300">
-                                                                Group
-                                                            </Badge>
-                                                        ) : expense.paidFor.length ===
-                                                          trip.people.length ? (
-                                                            <Badge className="bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300">
-                                                                Everyone
-                                                            </Badge>
-                                                        ) : (
-                                                            expense.paidFor.map((person) => (
-                                                                <Badge
-                                                                    key={person}
-                                                                    className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
-                                                                >
-                                                                    {person}
+                                                <div className="flex items-center gap-2">
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleMoveExpense(
+                                                                    expenseIndex,
+                                                                    expenseIndex - 1
+                                                                );
+                                                            }}
+                                                            disabled={expenseIndex === 0}
+                                                            className="h-5 w-5 cursor-pointer"
+                                                        >
+                                                            <ChevronUp className="w-3 h-3" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleMoveExpense(
+                                                                    expenseIndex,
+                                                                    expenseIndex + 1
+                                                                );
+                                                            }}
+                                                            disabled={
+                                                                expenseIndex ===
+                                                                trip.expenses.length - 1
+                                                            }
+                                                            className="h-5 w-5 cursor-pointer"
+                                                        >
+                                                            <ChevronDown className="w-3 h-3" />
+                                                        </Button>
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h4 className="font-medium text-stone-900 dark:text-stone-100">
+                                                            {expense.description}
+                                                        </h4>
+                                                        <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
+                                                            Paid by {expense.paidBy}
+                                                        </p>
+                                                        <div className="flex flex-wrap gap-1.5 mt-2">
+                                                            {expense.items ? (
+                                                                <Badge className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300">
+                                                                    Group
                                                                 </Badge>
-                                                            ))
-                                                        )}
+                                                            ) : expense.paidFor.length ===
+                                                              trip.people.length ? (
+                                                                <Badge className="bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300">
+                                                                    Everyone
+                                                                </Badge>
+                                                            ) : (
+                                                                expense.paidFor.map((person) => (
+                                                                    <Badge
+                                                                        key={person}
+                                                                        className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
+                                                                    >
+                                                                        {person}
+                                                                    </Badge>
+                                                                ))
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div className="flex flex-col items-end gap-2">
